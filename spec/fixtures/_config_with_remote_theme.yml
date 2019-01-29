@@ -16,3 +16,4 @@ paginate: 5
 github:
   source:
     branch: gh-pages
+remote_theme: pages-themes/cayman

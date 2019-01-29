@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module GitHubPages
   # Dependencies is where all the public dependencies for GitHub Pages are defined,
   # and versions locked. Any plugin for Pages must be specified here with a
@@ -6,46 +7,45 @@ module GitHubPages
   class Dependencies
     VERSIONS = {
       # Jekyll
-      "jekyll"                    => "3.4.1",
-      "jekyll-sass-converter"     => "1.5.0",
+      "jekyll"                    => "3.6.2",
+      "jekyll-sass-converter"     => "1.5.2",
 
       # Converters
-      "kramdown"                  => "1.13.2",
+      "kramdown"                  => "1.16.2",
+      "jekyll-commonmark-ghpages" => "0.1.5",
 
       # Misc
-      "liquid"                    => "3.0.6",
-      "rouge"                     => "1.11.1",
-      "github-pages-health-check" => "1.3.3",
+      "liquid"                    => "4.0.0",
+      "rouge"                     => "2.2.1",
+      "github-pages-health-check" => "1.4.0",
 
       # Plugins
-      "jekyll-redirect-from"   => "0.12.1",
-      "jekyll-sitemap"         => "1.0.0",
-      "jekyll-feed"            => "0.9.1",
-      "jekyll-gist"            => "1.4.0",
+      "jekyll-redirect-from"   => "0.13.0",
+      "jekyll-sitemap"         => "1.2.0",
+      "jekyll-feed"            => "0.9.3",
+      "jekyll-gist"            => "1.5.0",
       "jekyll-paginate"        => "1.1.0",
-      "jekyll-coffeescript"    => "1.0.1",
-      "jekyll-seo-tag"         => "2.1.0",
-      "jekyll-github-metadata" => "2.3.1",
-      "jekyll-avatar"          => "0.4.2",
+      "jekyll-coffeescript"    => "1.1.1",
+      "jekyll-seo-tag"         => "2.4.0",
+      "jekyll-github-metadata" => "2.9.4",
+      "jekyll-avatar"          => "0.5.0",
+      "jekyll-remote-theme"    => "0.2.3",
 
       # Plugins to match GitHub.com Markdown
-      "jemoji"                       => "0.8.0",
-      "jekyll-mentions"              => "1.2.0",
-      "jekyll-relative-links"        => "0.3.0",
-      "jekyll-optional-front-matter" => "0.1.2",
-      "jekyll-readme-index"          => "0.0.4",
+      "jemoji"                       => "0.9.0",
+      "jekyll-mentions"              => "1.3.0",
+      "jekyll-relative-links"        => "0.5.3",
+      "jekyll-optional-front-matter" => "0.3.0",
+      "jekyll-readme-index"          => "0.2.0",
       "jekyll-default-layout"        => "0.1.4",
-      "jekyll-titles-from-headings"  => "0.1.4",
+      "jekyll-titles-from-headings"  => "0.5.1",
 
       # Pin listen because it's broken on 2.1 & that's what we recommend.
       # https://github.com/guard/listen/pull/371
-      "listen"                    => "3.0.6",
+      "listen"                    => "3.1.5",
 
       # Pin activesupport because 5.0 is broken on 2.1
-      "activesupport"             => "4.2.7",
-
-      # Pin nokogiri to 1.6 because 1.7 dropped support for Ruby 2.0.
-      "nokogiri"                  => "1.6.8.1",
+      "activesupport"             => "4.2.9",
     }.freeze
 
     # Jekyll and related dependency versions as used by GitHub Pages.
@@ -65,6 +65,7 @@ module GitHubPages
       require "html/pipeline/version"
       require "sass/version"
       require "safe_yaml/version"
+      require "nokogiri"
 
       {
         "ruby" => RUBY_VERSION,
@@ -74,6 +75,7 @@ module GitHubPages
         "html-pipeline" => HTML::Pipeline::VERSION,
         "sass"          => Sass.version[:number],
         "safe_yaml"     => SafeYAML::VERSION,
+        "nokogiri"      => Nokogiri::VERSION,
       }
     end
   end

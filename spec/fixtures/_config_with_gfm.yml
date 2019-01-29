@@ -1,3 +1,4 @@
+markdown: GFM
 some_key: some_value
 safe: false
 gems:

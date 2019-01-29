@@ -1,10 +1,12 @@
 # frozen_string_literal: true
+
 module GitHubPages
   # Manages the constants the govern what plugins are allows on GitHub Pages
   class Plugins
     # Plugins which are activated by default
     DEFAULT_PLUGINS = %w(
       jekyll-coffeescript
+      jekyll-commonmark-ghpages
       jekyll-gist
       jekyll-github-metadata
       jekyll-paginate
@@ -18,6 +20,7 @@ module GitHubPages
     # Plugins allowed by GitHub Pages
     PLUGIN_WHITELIST = %w(
       jekyll-coffeescript
+      jekyll-commonmark-ghpages
       jekyll-feed
       jekyll-gist
       jekyll-github-metadata
@@ -34,6 +37,8 @@ module GitHubPages
       jekyll-default-layout
       jekyll-titles-from-headings
       jekyll-include-cache
+      jekyll-octicons
+      jekyll-remote-theme
     ).freeze
 
     # Plugins only allowed locally
@@ -43,21 +48,21 @@ module GitHubPages
 
     # Themes
     THEMES = {
-      "minima"                     => "2.0.0",
+      "minima"                     => "2.4.0",
       "jekyll-swiss"               => "0.4.0",
-      "jekyll-theme-primer"        => "0.1.7",
-      "jekyll-theme-architect"     => "0.0.3",
-      "jekyll-theme-cayman"        => "0.0.3",
-      "jekyll-theme-dinky"         => "0.0.3",
-      "jekyll-theme-hacker"        => "0.0.3",
-      "jekyll-theme-leap-day"      => "0.0.3",
-      "jekyll-theme-merlot"        => "0.0.3",
-      "jekyll-theme-midnight"      => "0.0.3",
-      "jekyll-theme-minimal"       => "0.0.3",
-      "jekyll-theme-modernist"     => "0.0.3",
-      "jekyll-theme-slate"         => "0.0.3",
-      "jekyll-theme-tactile"       => "0.0.3",
-      "jekyll-theme-time-machine"  => "0.0.3",
+      "jekyll-theme-primer"        => "0.5.2",
+      "jekyll-theme-architect"     => "0.1.0",
+      "jekyll-theme-cayman"        => "0.1.0",
+      "jekyll-theme-dinky"         => "0.1.0",
+      "jekyll-theme-hacker"        => "0.1.0",
+      "jekyll-theme-leap-day"      => "0.1.0",
+      "jekyll-theme-merlot"        => "0.1.0",
+      "jekyll-theme-midnight"      => "0.1.0",
+      "jekyll-theme-minimal"       => "0.1.0",
+      "jekyll-theme-modernist"     => "0.1.0",
+      "jekyll-theme-slate"         => "0.1.0",
+      "jekyll-theme-tactile"       => "0.1.0",
+      "jekyll-theme-time-machine"  => "0.1.0",
     }.freeze
   end
 end

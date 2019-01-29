@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require "securerandom"
 
 module GitHubPages
@@ -13,21 +14,24 @@ module GitHubPages
     # Default, user overwritable options
     DEFAULTS = {
       "jailed"   => false,
-      "gems"     => GitHubPages::Plugins::DEFAULT_PLUGINS,
+      "plugins"  => GitHubPages::Plugins::DEFAULT_PLUGINS,
       "future"   => true,
       "theme"    => "jekyll-theme-primer",
+      "markdown" => "kramdown",
       "kramdown" => {
         "input"     => "GFM",
         "hard_wrap" => false,
         "gfm_quirks" => "paragraph_end",
       },
+      "exclude" => ["CNAME"],
     }.freeze
 
-    # Jekyll defaults merged with Pages defaults.
-    MERGED_DEFAULTS = Jekyll::Utils.deep_merge_hashes(
-      Jekyll::Configuration::DEFAULTS,
-      DEFAULTS
-    ).freeze
+    # User-overwritable defaults used only in production for practical reasons
+    PRODUCTION_DEFAULTS = Jekyll::Utils.deep_merge_hashes DEFAULTS, {
+      "sass" => {
+        "style" => "compressed",
+      },
+    }.freeze
 
     # Options which GitHub Pages sets, regardless of the user-specified value
     #
@@ -42,7 +46,6 @@ module GitHubPages
     OVERRIDES = {
       "lsi"         => false,
       "safe"        => true,
-      "plugins"     => SecureRandom.hex,
       "plugins_dir" => SecureRandom.hex,
       "whitelist"   => GitHubPages::Plugins::PLUGIN_WHITELIST,
       "highlighter" => "rouge",
@@ -60,7 +63,7 @@ module GitHubPages
     # Jekyll::Site and need to be set properly when the config is updated.
     CONFIGS_WITH_METHODS = %w(
       safe lsi highlighter baseurl exclude include future unpublished
-      show_drafts limit_posts keep_files gems
+      show_drafts limit_posts keep_files
     ).freeze
 
     class << self
@@ -80,6 +83,11 @@ module GitHubPages
         Jekyll.env == "development"
       end
 
+      def defaults_for_env
+        defaults = development? ? DEFAULTS : PRODUCTION_DEFAULTS
+        Jekyll::Utils.deep_merge_hashes Jekyll::Configuration::DEFAULTS, defaults
+      end
+
       # Given a user's config, determines the effective configuration by building a user
       # configuration sandwhich with our overrides overriding the user's specified
       # values which themselves override our defaults.
@@ -89,17 +97,18 @@ module GitHubPages
       # Note: this is a highly modified version of Jekyll#configuration
       def effective_config(user_config)
         # Merge user config into defaults
-        config = Jekyll::Utils.deep_merge_hashes(MERGED_DEFAULTS, user_config)
+        config = Jekyll::Utils.deep_merge_hashes(defaults_for_env, user_config)
           .fix_common_issues
           .add_default_collections
+
+        exclude_cname(config)
 
         # Merge overwrites into user config
         config = Jekyll::Utils.deep_merge_hashes config, OVERRIDES
 
-        # Ensure we have those gems we want.
-        config["gems"] = Array(config["gems"]) | DEFAULT_PLUGINS
-        config["whitelist"] = config["whitelist"] | config["gems"] if disable_whitelist?
-        config["whitelist"] = config["whitelist"] | DEVELOPMENT_PLUGINS if development?
+        restrict_and_config_markdown_processor(config)
+
+        configure_plugins(config)
 
         config
       end
@@ -114,25 +123,60 @@ module GitHubPages
         processed(site)
       end
 
+      # Set the site's configuration with all the proper defaults and overrides.
+      # Should be called by #set to protect against multiple processings.
+      def set!(site)
+        site.config = effective_config(site.config)
+      end
+
+      private
+
+      # Ensure we're using Kramdown or GFM.  Force to Kramdown if
+      # neither of these.
+      #
+      # This can get called multiply on the same config, so try to
+      # be idempotentish.
+      def restrict_and_config_markdown_processor(config)
+        config["markdown"] = "kramdown" unless \
+          %w(kramdown gfm commonmarkghpages).include?(config["markdown"].to_s.downcase)
+
+        return unless config["markdown"].to_s.casecmp("gfm").zero?
+
+        config["markdown"] = "CommonMarkGhPages"
+        config["commonmark"] = {
+          "extensions" => %w(table strikethrough autolink tagfilter),
+          "options" => %w(footnotes),
+        }
+      end
+
+      # If the user's 'exclude' config is the default, also exclude the CNAME
+      def exclude_cname(config)
+        return unless config["exclude"].eql? Jekyll::Configuration::DEFAULTS["exclude"]
+        config["exclude"].concat(DEFAULTS["exclude"])
+      end
+
+      # Requires default plugins and configures whitelist in development
+      def configure_plugins(config)
+        # Ensure we have those gems we want.
+        config["plugins"] = Array(config["plugins"]) | DEFAULT_PLUGINS
+
+        # To minimize erorrs, lazy-require jekyll-remote-theme if requested by the user
+        config["plugins"].push("jekyll-remote-theme") if config.key? "remote_theme"
+
+        return unless development?
+
+        if disable_whitelist?
+          config["whitelist"] = config["whitelist"] | config["plugins"]
+        end
+
+        config["whitelist"] = config["whitelist"] | DEVELOPMENT_PLUGINS
+      end
+
       # Print the versions for github-pages and jekyll to the debug
       # stream for debugging purposes. See by running Jekyll with '--verbose'
       def debug_print_versions
         Jekyll.logger.debug "GitHub Pages:", "github-pages v#{GitHubPages::VERSION}"
         Jekyll.logger.debug "GitHub Pages:", "jekyll v#{Jekyll::VERSION}"
-      end
-
-      # Set the site's configuration with all the proper defaults and overrides.
-      # Should be called by #set to protect against multiple processings.
-      def set!(site)
-        config = effective_config(site.config)
-
-        # Assign everything to the site
-        site.instance_variable_set :@config, config
-
-        # Ensure all
-        CONFIGS_WITH_METHODS.each do |opt|
-          site.public_send("#{opt}=", site.config[opt])
-        end
       end
     end
   end
